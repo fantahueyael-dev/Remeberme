@@ -1,0 +1,96 @@
+let language = "en";
+
+let medications = JSON.parse(localStorage.getItem("medications")) || [];
+let bloodPressures = JSON.parse(localStorage.getItem("bloodPressures")) || [];
+let sugars = JSON.parse(localStorage.getItem("sugars")) || [];
+
+function saveData() {
+  localStorage.setItem("medications", JSON.stringify(medications));
+  localStorage.setItem("bloodPressures", JSON.stringify(bloodPressures));
+  localStorage.setItem("sugars", JSON.stringify(sugars));
+}
+body {
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+function addMedication() {
+  const name = document.getElementById("medName").value;
+  const time = document.getElementById("medTime").value;
+  if (!name || !time) return;
+
+  medications.push({ name, time });
+  saveData();
+  renderLists();
+}
+
+function addBP() {
+  const sys = document.getElementById("systolic").value;
+  const dia = document.getElementById("diastolic").value;
+  if (!sys || !dia) return;
+
+  bloodPressures.push({ sys, dia, date: new Date().toLocaleDateString() });
+  saveData();
+  renderLists();
+}
+
+function addSugar() {
+  const value = document.getElementById("sugarValue").value;
+  if (!value) return;
+
+  sugars.push({ value, date: new Date().toLocaleDateString() });
+  saveData();
+  renderLists();
+}
+
+function renderLists() {
+  document.getElementById("medList").innerHTML =
+    medications.map(m => `<li>${m.name} - ${m.time}</li>`).join("");
+
+  document.getElementById("bpList").innerHTML =
+    bloodPressures.map(b => `<li>${b.sys}/${b.dia} - ${b.date}</li>`).join("");
+
+  document.getElementById("sugarList").innerHTML =
+    sugars.map(s => `<li>${s.value} - ${s.date}</li>`).join("");
+}
+
+function exportData() {
+  let csv = "Type,Value,Date\n";
+
+  bloodPressures.forEach(b => {
+    csv += `Blood Pressure,${b.sys}/${b.dia},${b.date}\n`;
+  });
+
+  sugars.forEach(s => {
+    csv += `Blood Sugar,${s.value},${s.date}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "health_data.csv";
+  a.click();
+}
+
+function toggleLanguage() {
+  if (language === "en") {
+    document.getElementById("title").innerText = "የወላጆች ጤና መቆጣጠሪያ";
+    document.getElementById("medTitle").innerText = "መድሃኒት";
+    document.getElementById("bpTitle").innerText = "የደም ግፊት";
+    document.getElementById("sugarTitle").innerText = "የስኳር መጠን";
+    language = "am";
+  } else {
+    document.getElementById("title").innerText = "Parent Health Tracker";
+    document.getElementById("medTitle").innerText = "Medication";
+    document.getElementById("bpTitle").innerText = "Blood Pressure";
+    document.getElementById("sugarTitle").innerText = "Blood Sugar";
+    language = "en";
+  }
+}
+
+renderLists();
